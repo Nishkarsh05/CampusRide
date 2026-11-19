@@ -54,7 +54,6 @@ class CampusRideRepository {
 
   Future<void> publishLocation({
     required String busId,
-    required String userId,
     required Position position,
   }) {
     return _buses.child(busId).child('location').set({
@@ -63,7 +62,6 @@ class CampusRideRepository {
       'accuracy': position.accuracy,
       'updatedAt': ServerValue.timestamp,
       'sharing': true,
-      'userId': userId,
     });
   }
 

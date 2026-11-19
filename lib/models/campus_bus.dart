@@ -29,15 +29,11 @@ class CampusBus {
   const CampusBus({
     required this.id,
     required this.busNumber,
-    required this.driver,
-    required this.mobile,
     required this.stops,
   });
 
   final String id;
   final String busNumber;
-  final String driver;
-  final String mobile;
   final List<BusStop> stops;
 
   factory CampusBus.fromJson(String id, dynamic value) {
@@ -64,8 +60,6 @@ class CampusBus {
     return CampusBus(
       id: id,
       busNumber: data['busNumber']?.toString() ?? 'Unknown bus',
-      driver: data['driver']?.toString() ?? 'Driver not listed',
-      mobile: data['mobile']?.toString() ?? '',
       stops: stops,
     );
   }
@@ -82,8 +76,6 @@ class CampusBus {
     return CampusBus(
       id: snapshot.key ?? '',
       busNumber: snapshot.child('busNumber').value?.toString() ?? 'Unknown bus',
-      driver: snapshot.child('driver').value?.toString() ?? 'Driver not listed',
-      mobile: snapshot.child('mobile').value?.toString() ?? '',
       stops: stops,
     );
   }

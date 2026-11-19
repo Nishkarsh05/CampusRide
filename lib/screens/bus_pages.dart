@@ -51,8 +51,7 @@ class _RoutesPageState extends State<RoutesPage> {
         final query = _query.trim().toLowerCase();
         final buses = allBuses.where((bus) {
           return bus.id.toLowerCase().contains(query) ||
-              bus.busNumber.toLowerCase().contains(query) ||
-              bus.driver.toLowerCase().contains(query);
+              bus.busNumber.toLowerCase().contains(query);
         }).toList();
         return Column(
           children: [
@@ -62,7 +61,7 @@ class _RoutesPageState extends State<RoutesPage> {
                 controller: _searchController,
                 onChanged: (value) => setState(() => _query = value),
                 decoration: InputDecoration(
-                  hintText: 'Search by route, bus, or driver',
+                  hintText: 'Search by route or bus number',
                   prefixIcon: const Icon(Icons.search_rounded),
                   suffixIcon: _query.isEmpty
                       ? null
@@ -81,7 +80,7 @@ class _RoutesPageState extends State<RoutesPage> {
                   ? const _EmptyState(
                       icon: Icons.alt_route_rounded,
                       title: 'No matching routes',
-                      message: 'Try another route ID, bus number, or driver.',
+                      message: 'Try another route ID or bus number.',
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.fromLTRB(18, 8, 18, 22),
@@ -203,18 +202,6 @@ class BusDetailsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   _InfoLine(
-                    icon: Icons.person_outline_rounded,
-                    label: 'Driver',
-                    value: bus.driver,
-                  ),
-                  const SizedBox(height: 10),
-                  _InfoLine(
-                    icon: Icons.call_outlined,
-                    label: 'Contact',
-                    value: bus.mobile.isEmpty ? 'Not listed' : bus.mobile,
-                  ),
-                  const SizedBox(height: 10),
-                  _InfoLine(
                     icon: Icons.alt_route_rounded,
                     label: 'Stops',
                     value: '${bus.stops.length} on this route',
@@ -312,8 +299,7 @@ class _TrackingPageState extends State<TrackingPage> {
 
   Future<void> _startSharing() async {
     final busId = _selectedBusId;
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (busId == null || userId == null) return;
+    if (busId == null || FirebaseAuth.instance.currentUser == null) return;
     setState(() => _startingShare = true);
     try {
       if (!await _ensureLocationPermission()) return;
@@ -324,7 +310,6 @@ class _TrackingPageState extends State<TrackingPage> {
       );
       await CampusRideRepository.instance.publishLocation(
         busId: busId,
-        userId: userId,
         position: position,
       );
       _positionSubscription =
@@ -334,8 +319,7 @@ class _TrackingPageState extends State<TrackingPage> {
               distanceFilter: 20,
             ),
           ).listen(
-            (nextPosition) =>
-                unawaited(_publishPosition(busId, userId, nextPosition)),
+            (nextPosition) => unawaited(_publishPosition(busId, nextPosition)),
             onError: (_) {
               if (mounted) {
                 _message('Location updates stopped. Check location access.');
@@ -358,15 +342,10 @@ class _TrackingPageState extends State<TrackingPage> {
     }
   }
 
-  Future<void> _publishPosition(
-    String busId,
-    String userId,
-    Position position,
-  ) async {
+  Future<void> _publishPosition(String busId, Position position) async {
     try {
       await CampusRideRepository.instance.publishLocation(
         busId: busId,
-        userId: userId,
         position: position,
       );
     } on FirebaseException catch (error) {
@@ -683,11 +662,6 @@ class _BusCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      bus.driver,
-                      style: TextStyle(color: Colors.blueGrey.shade600),
-                    ),
-                    const SizedBox(height: 6),
                     Text(
                       '${bus.stops.length} stops',
                       style: TextStyle(

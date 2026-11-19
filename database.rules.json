@@ -1,0 +1,23 @@
+{
+  "rules": {
+    "buses": {
+      ".read": true,
+      "$busId": {
+        "location": {
+          ".write": "auth != null && root.child('driverAssignments').child(auth.uid).child($busId).val() === true",
+          ".validate": "newData.hasChildren(['latitude', 'longitude', 'accuracy', 'updatedAt', 'sharing']) && newData.child('latitude').isNumber() && newData.child('latitude').val() >= -90 && newData.child('latitude').val() <= 90 && newData.child('longitude').isNumber() && newData.child('longitude').val() >= -180 && newData.child('longitude').val() <= 180 && newData.child('accuracy').isNumber() && newData.child('updatedAt').isNumber() && newData.child('sharing').isBoolean()"
+        }
+      }
+    },
+    "driverAssignments": {
+      ".read": false,
+      ".write": false
+    },
+    "driverContacts": {
+      "$busId": {
+        ".read": "auth != null && root.child('driverAssignments').child(auth.uid).child($busId).val() === true",
+        ".write": false
+      }
+    }
+  }
+}
